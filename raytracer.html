@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+	
+<head>
+	<title>raytracer</title>
+	<script type="text/javascript" src="raytracer.js"></script>
+
+	<!--<script type="text/javascript">
+		function drawRectangle()
+		{
+			var c = document.getElementById("mainCanvas");
+			var ctx = c.getContext("2d");
+			ctx.fillStyle = "#F1FEB2";
+			ctx.fillRect(0,0,40,30);
+		}
+	</script>-->
+	<style>
+		#mainCanvas { border:1px solid #000000;}
+	</style>
+</head> 
+
+<body>
+	<div id="container">
+		<h1> Ray Tracer</h1>
+		<canvas id="mainCanvas" width="400" height="400"></canvas>
+		<button type="button" onclick="raytrace()">raytrace</button>
+	</div>
+</body>
+
+</html>
