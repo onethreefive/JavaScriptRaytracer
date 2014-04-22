@@ -87,15 +87,15 @@ function light (position)
 	this.pos = position;
 }
 
-
+    
 var mainLight = new light(new Vec3(-8.1, 10.1, -1.1));
 
 var spheres = new Array();
-spheres.push( new Sphere(new Vec3(-1.9,0.1,-5.1), 1, new Vec3(45,120,90), 2, 1) );
-spheres.push( new Sphere(new Vec3(0.1,0.1,-5.1), 1, new Vec3(30,95,130), 1, 1) );
-spheres.push( new Sphere(new Vec3(2.1,0.1,-5.1), 1, new Vec3(150,80,25), 0, 1) );
+spheres.push( new Sphere(new Vec3(-2,0.3,-5.1), 1, new Vec3(45,120,90), 2, 1) );
+spheres.push( new Sphere(new Vec3(0,0.-1,-9.1), 1, new Vec3(30,95,130), 1, 1) );
+spheres.push( new Sphere(new Vec3(2,0.1,-4.1), 1, new Vec3(150,80,25), 0, 1) );
 
-var cam = new Camera(7, CANVAS_WIDTH, CANVAS_HEIGHT, 70, new Vec3(0,0,0), new Vec3(0,0,-1));
+var cam = new Camera(5, CANVAS_WIDTH, CANVAS_HEIGHT, 70, new Vec3(0,0,0), new Vec3(0,0,-1));
 
 
 function drawRectangle(x,y,colour)
@@ -174,12 +174,6 @@ function raySphereIntersection(origin,d,sphere)
 function raytrace()
 {
     console.time("MyTimer");
-    
-	for(var y=0; y<cam.resY; y++){
-		for(var x=0; x<cam.resX; x++){
-			drawRectangle(x,y, 'rgb(100,100,100)');
-		}
-	}
 	
 	var ray;
 	var dist;
@@ -215,7 +209,6 @@ function raytrace()
                 var point = cam.pos.add( ray.mul(dist) ); //location of the intersection
                 var surf_norm = (point.sub(spheres[sphere_index].pos)).norm() //surface normal at intersection
 				var shadow = false; //bool value that indicates whether or not the intersection location is in shadow
-				//var shadow_ray = normalize(sub(mainLight.pos,point));
 				var shadow_ray = (mainLight.pos.sub(point)).norm();
                 
 				var rad = AMBIENT_COEFF;
@@ -240,6 +233,10 @@ function raytrace()
 				}
 				drawRectangle(x,y, 'rgb('+Math.floor(rad*colour.x) +','+ Math.floor(rad*colour.y) +','+ Math.floor(rad*colour.z)+')');
 			}
+            /*else
+            {
+                drawRectangle(x,y, 'rgb(0,0,0)');
+            }*/
 		}
 		
 	}
