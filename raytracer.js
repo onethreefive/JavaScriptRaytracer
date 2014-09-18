@@ -87,34 +87,6 @@ function light (position)
 	this.pos = position;
 }
 
-    
-var mainLight = new light(new Vec3(-8.1, 10.1, -1.1));
-
-var spheres = new Array();
-spheres.push( new Sphere(new Vec3(-2,0.3,-5.1), 1, new Vec3(45,120,90), 2, 1) );
-spheres.push( new Sphere(new Vec3(0,0.-1,-9.1), 1, new Vec3(30,95,130), 1, 1) );
-spheres.push( new Sphere(new Vec3(2,0.1,-4.1), 1, new Vec3(150,80,25), 0, 1) );
-
-var cam = new Camera(5, CANVAS_WIDTH, CANVAS_HEIGHT, 70, new Vec3(0,0,0), new Vec3(0,0,-1));
-
-
-function drawRectangle(x,y,colour)
-{
-	var c = document.getElementById("mainCanvas");
-	var ctx = c.getContext("2d");
-	ctx.fillStyle = colour;
-	ctx.fillRect(x*cam.res,y*cam.res,cam.res,cam.res);
-}
-
-function computeRay(x,y)
-{
-	var x_comp = x-cam.ppX;
-	var y_comp = cam.ppY-y;
-	var length = Math.sqrt(Math.pow(x_comp,2) + Math.pow(y_comp,2) + cam.flSqrd)
-	var ray = new Vec3(x_comp/length, y_comp/length, -cam.focalLength/length);
-	return ray;
-}
-
 //sphere intersection based on code found at http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection
 function raySphereIntersection(origin,d,sphere)
 {
@@ -170,8 +142,40 @@ function raySphereIntersection(origin,d,sphere)
 		//return t;
     }
 }
+
+
+function World ()
+{
+	this.mainLight = new light(new Vec3(-8.1, 10.1, -1.1));
+
+	this.spheres = new Array();
+	this.spheres.push( new Sphere(new Vec3(-2,0.3,-5.1), 1, new Vec3(45,120,90), 2, 1) );
+	this.spheres.push( new Sphere(new Vec3(0,0.-1,-9.1), 1, new Vec3(30,95,130), 1, 1) );
+	this.spheres.push( new Sphere(new Vec3(2,0.1,-4.1), 1, new Vec3(150,80,25), 0, 1) );
 	
-function raytrace()
+	this.cam = new Camera(5, CANVAS_WIDTH, CANVAS_HEIGHT, 70, new Vec3(0,0,0), new Vec3(0,0,-1));
+}
+
+
+
+World.prototype.drawRectangle = function(x,y,colour)
+{
+	var c = document.getElementById("mainCanvas");
+	var ctx = c.getContext("2d");
+	ctx.fillStyle = colour;
+	ctx.fillRect(x*this.cam.res,y*this.cam.res,this.cam.res,this.cam.res);
+}
+
+World.prototype.computeRay = function(x,y)
+{
+	var x_comp = x-this.cam.ppX;
+	var y_comp = this.cam.ppY-y;
+	var length = Math.sqrt(Math.pow(x_comp,2) + Math.pow(y_comp,2) + this.cam.flSqrd)
+	var ray = new Vec3(x_comp/length, y_comp/length, -this.cam.focalLength/length);
+	return ray;
+}
+
+World.prototype.raytrace = function()
 {
     console.time("MyTimer");
 	
@@ -182,17 +186,17 @@ function raytrace()
 	var collision;
 	var count = 0;
 	
-	for(var y=0; y<cam.resY; y++){
-		for(var x=0; x<cam.resX; x++){
+	for(var y=0; y<this.cam.resY; y++){
+		for(var x=0; x<this.cam.resX; x++){
 			
-			ray = computeRay(x,y);
+			ray = this.computeRay(x,y);
 			collision = false;
 			dist = 9999;
 			temp_dist = 0
 			
-			for(var i=0; i<spheres.length; i++)
+			for(var i=0; i<this.spheres.length; i++)
 			{
-				temp_dist = raySphereIntersection(cam.pos, ray, spheres[i]);
+				temp_dist = raySphereIntersection(this.cam.pos, ray, this.spheres[i]);
 				
 				if( temp_dist > 0.000001)
 				{
@@ -206,17 +210,17 @@ function raytrace()
 			}
 			if(collision == true)
 			{
-                var point = cam.pos.add( ray.mul(dist) ); //location of the intersection
-                var surf_norm = (point.sub(spheres[sphere_index].pos)).norm() //surface normal at intersection
+                var point = this.cam.pos.add( ray.mul(dist) ); //location of the intersection
+                var surf_norm = (point.sub(this.spheres[sphere_index].pos)).norm() //surface normal at intersection
 				var shadow = false; //bool value that indicates whether or not the intersection location is in shadow
-				var shadow_ray = (mainLight.pos.sub(point)).norm();
+				var shadow_ray = (this.mainLight.pos.sub(point)).norm();
                 
 				var rad = AMBIENT_COEFF;
-				var colour = spheres[sphere_index].colour;
+				var colour = this.spheres[sphere_index].colour;
 				
-				for(var i=0; i<spheres.length; i++)
+				for(var i=0; i<this.spheres.length; i++)
 				{
-					if(raySphereIntersection(point,shadow_ray,spheres[i]) > 0.000001)
+					if(raySphereIntersection(point,shadow_ray,this.spheres[i]) > 0.000001)
                     {
 						shadow = true;
                         break;
@@ -229,9 +233,9 @@ function raytrace()
 					var specular = Math.pow(reflected.neg().dot(shadow_ray),96);
 					var specular = Math.max(0, specular);
 					
-					rad = rad + spheres[sphere_index].diff_coeff*diffuse + spheres[sphere_index].spec_coeff*specular;
+					rad = rad + this.spheres[sphere_index].diff_coeff*diffuse + this.spheres[sphere_index].spec_coeff*specular;
 				}
-				drawRectangle(x,y, 'rgb('+Math.floor(rad*colour.x) +','+ Math.floor(rad*colour.y) +','+ Math.floor(rad*colour.z)+')');
+				this.drawRectangle(x,y, 'rgb('+Math.floor(rad*colour.x) +','+ Math.floor(rad*colour.y) +','+ Math.floor(rad*colour.z)+')');
 			}
             /*else
             {
@@ -242,3 +246,5 @@ function raytrace()
 	}
     console.timeEnd("MyTimer");
 }
+
+var myWorld = new World()
