@@ -16,6 +16,15 @@
 		<h1> Ray Tracer</h1>
 		<canvas id="mainCanvas" width="400" height="400"></canvas>
 		<button type="button" onclick="myWorld.raytrace()">raytrace</button>
+        
+        <h3>Light location:</h3><br>
+        
+        X: <input type="number" id="lightX" value ="-8" min="-20" max="20"><br>
+        Y: <input type="number" id="lightY" value ="10" min="1" max="20"><br>
+        Z: <input type="number" id="lightZ" value ="1" min="-20" max="20">      
+       
+		<button type="button" onclick="getLightInput()">move light</button>
+        
 	</div>
 </body>
 
