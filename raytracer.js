@@ -16,6 +16,7 @@ function Vec3 (x, y, z)
     this.z = z;
 }
 
+//Vec3 member functions for vector arithmetic
 Vec3.prototype.neg = function() {
     return new Vec3(-this.x, -this.y, -this.z);
 };
@@ -173,13 +174,13 @@ Plane.prototype.getNormal = function(point)
 {
     return this.normal;
 }
-        
+    
 
 // Class that contains all the elements of the scene: camera, lights, and objects.
 // Also has member functions containing the rendering logic.
 function World ()
 {
-    this.mainLight = new light(new Vec3(-8.1, 10.1, 1));
+    this.mainLight = new light(new Vec3(-8, 10, 1));
     
     this.floorNorm = new Vec3(0,1,0);
     this.floorOrigin = new Vec3(0,0,0);
@@ -189,7 +190,13 @@ function World ()
     this.objects.push( new Sphere(new Vec3(0,0.1,-6.1), 1, new Vec3(30,95,130), 2, 1.5) );
     this.objects.push( new Sphere(new Vec3(2,0.1,-6.1), 1, new Vec3(150,80,25), 2, 1.5) );
     
-    this.cam = new Camera(4, CANVAS_WIDTH, CANVAS_HEIGHT, 70, new Vec3(0,0,0), new Vec3(0,0,-1));
+    this.cam = new Camera(1, CANVAS_WIDTH, CANVAS_HEIGHT, 70, new Vec3(0,0,0), new Vec3(0,0,-1));
+}
+
+//Resets the location of the light.
+World.prototype.moveLight = function(new_x, new_y, new_z)
+{
+    this.mainLight.pos = new Vec3(new_x, new_y, new_z);
 }
 
 World.prototype.drawRectangle = function(x,y,colour)
@@ -232,20 +239,19 @@ World.prototype.raytrace = function()
     	    {
                 temp_dist = this.objects[i].intersect(this.cam.pos, ray);
     		if( temp_dist > 0.000001)
-    		{
-    		    collision = true;
-    		    if(temp_dist < dist)
     		    {
-    			dist = temp_dist;
-    			object_index = i;
+    		        collision = true;
+    		        if(temp_dist < dist)
+    		        {
+    			    dist = temp_dist;
+    			    object_index = i;
+    		        }
     		    }
-    		}
-    	  }
+    	    }
     	    if(collision == true)
     	    {
 		var obj = this.objects[object_index];
     	        var point = this.cam.pos.add( ray.mul(dist) ); //location of the intersection
-    	        //var surf_norm = (point.sub(obj.pos)).norm() //surface normal at intersectioni
                 var surf_norm = obj.getNormal(point);
     		var shadow = false; //bool value that indicates whether or not the intersection location is in shadow
     		var shadow_ray = (this.mainLight.pos.sub(point)).norm();
@@ -255,26 +261,24 @@ World.prototype.raytrace = function()
     			
     		for(var i=0; i<this.objects.length; i++)
     		{
-    		    //if(raySphereIntersection(point,shadow_ray,this.objects[i]) > 0.000001)
-                    if(this.objects[i].intersect(point, shadow_ray) > 0.00001)
-    	            {
-    		        shadow = true;
-    		        break;
-    	            }
+		    if(this.objects[i].intersect(point, shadow_ray) > 0.00001)
+		    {
+		        shadow = true;
+			break;
+		    }
     		}
     		if(!shadow)
     		{
     	            var diffuse = Math.max(0, shadow_ray.dot(surf_norm));
     	            var reflected = ray.neg().sub(surf_norm.mul(2*ray.neg().dot(surf_norm)));
-    		    var specular = Math.max(0, Math.pow(reflected.neg().dot(shadow_ray),96));
-    				
+    		    var specular = Math.max(0, Math.pow(reflected.neg().dot(shadow_ray),96));		
     		    rad = rad + obj.diff_coeff*diffuse + obj.spec_coeff*specular;
     		}
-    		    this.drawRectangle(x,y, 'rgb('+Math.floor(rad*colour.x) +','+ Math.floor(rad*colour.y) +','+ Math.floor(rad*colour.z)+')');
+    		this.drawRectangle(x,y, 'rgb('+Math.floor(rad*colour.x) +','+ Math.floor(rad*colour.y) +','+ Math.floor(rad*colour.z)+')');
     	    }
             else
             {
-    	       this. drawRectangle(x,y, 'rgb(0,0,0)');
+    	        this.drawRectangle(x,y, 'rgb(0,0,0)');
             }
     	}
     }
@@ -286,6 +290,26 @@ function main()
 {
     myWorld = new World()
 }
+
+function getLightInput()
+{
+    var x = document.getElementById("lightX").value;
+    var y = document.getElementById("lightY").value;
+    var z = document.getElementById("lightZ").value;
+    
+    if (x == null)
+    {
+        alert("input value is null");
+    }
+    else
+    {
+        console.log(x, y, z);
+        myWorld.moveLight(x, y, z);
+        myWorld.raytrace();
+    }
+    //moveLight(x, y, z);
+}
+
 
 //myWorld.raytrace();
 
