@@ -266,17 +266,16 @@ World.prototype.raytrace = function()
     		{
     	            var diffuse = Math.max(0, shadow_ray.dot(surf_norm));
     	            var reflected = ray.neg().sub(surf_norm.mul(2*ray.neg().dot(surf_norm)));
-    		    var specular = Math.pow(reflected.neg().dot(shadow_ray),96);
-    		    var specular = Math.max(0, specular);
+    		    var specular = Math.max(0, Math.pow(reflected.neg().dot(shadow_ray),96));
     				
     		    rad = rad + obj.diff_coeff*diffuse + obj.spec_coeff*specular;
     		}
     		    this.drawRectangle(x,y, 'rgb('+Math.floor(rad*colour.x) +','+ Math.floor(rad*colour.y) +','+ Math.floor(rad*colour.z)+')');
     	    }
-        /*else
-        {
-    	drawRectangle(x,y, 'rgb(0,0,0)');
-        }*/
+            else
+            {
+    	       this. drawRectangle(x,y, 'rgb(0,0,0)');
+            }
     	}
     }
     console.timeEnd("MyTimer");
